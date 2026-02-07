@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Block Effect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+        background: #eae8e4;
+        color: #2c2c2c;
+        font-family: 'Instrument Serif', serif;
+    }
+
+    section {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0 2rem;
+    }
+
+    .text-block {
+        max-width: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .text-block p {
+        font-size: clamp(1.75rem, 3vw, 2.75rem);
+        font-weight: 400;
+        line-height: 1.6;
+        color: #3a3a3a;
+    }
+
+    /* ─── CONTAINER (IMAGE + TEXT) ──────────────── */
+    .container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .container .bg-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: brightness(0.55) saturate(0.8);
+    }
+
+    .container .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(234, 232, 228, 0.15);
+        pointer-events: none;
+    }
+
+    .container .text-block {
+        position: relative;
+        z-index: 2;
+    }
+
+    .container .text-block p {
+        color: #f5f3f0;
+    }
+
+    /* ─── LINE REVEAL ──────────────────────────── */
+    .line {
+        position: relative;
+        display: inline-block !important;
+    }
+
+    .line-box {
+        position: absolute;
+        top: 0;
+        left: -1%;
+        width: 102%;
+        height: 102%;
+    }
+</style>
+
+<body>
+
+    <!-- ─── INTRO ─────────────────────────────── -->
+    <section class="intro">
+        <div class="text-block">
+            <p data-color="#2c2c2c">We believe in the quiet power of ideas. The ones that sit with you long after you've
+                looked away.</p>
+        </div>
+    </section>
+
+    <!-- ─── CONTAINER (IMAGE + TEXT) ──────────── -->
+    <section class="container">
+        <img class="bg-image" src="https://images.pexels.com/photos/34034854/pexels-photo-34034854.jpeg" alt="">
+        <div class="overlay"></div>
+        <div class="text-block">
+            <p data-color="#f5f3f0">Some things are felt before they're understood. We craft those in-between moments —
+                still, sharp, and unforgettable.</p>
+        </div>
+    </section>
+
+    <!-- ─── OUTRO ─────────────────────────────── -->
+    <section class="outro">
+        <div class="text-block">
+            <p data-color="#2c2c2c">Not louder. Not faster. Just closer to something that actually matters.</p>
+        </div>
+    </section>
+
+    <!-- GSAP Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"
+        integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- GSAP ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+
+    <!-- GSAP SplitText -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+    <script>
+
+        window.addEventListener("load", () => {
+
+            const lenis = new Lenis();
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+
+
+            function textAnimate(text) {
+                const color = text.dataset.color;
+                const split = new SplitText(text, { type: 'lines', linesClass: 'line' });
+                const lineTexts = [], lineBoxes = [];
+
+                split.lines.forEach((line) => {
+                    const lineText = document.createElement('div');
+                    lineText.classList.add('line-text');
+                    lineText.innerHTML = line.innerHTML;
+
+                    const lineBox = document.createElement('div');
+                    lineBox.classList.add('line-box');
+
+                    line.innerHTML = '';
+                    line.appendChild(lineText);
+                    line.appendChild(lineBox);
+
+                    gsap.set(lineText, { opacity: 0 });
+                    gsap.set(lineBox, { scaleX: 0, transformOrigin: 'left center', backgroundColor: color });
+
+                    lineTexts.push(lineText);
+                    lineBoxes.push(lineBox);
+                });
+
+                const dur = 0.35;
+                const tl = gsap.timeline({
+                    scrollTrigger: { trigger: text.closest('section'), start: 'top 50%' }
+                });
+
+
+                tl.to(lineBoxes, { scaleX: 1, duration: dur, stagger: dur, ease: 'power2.inOut' });
+
+
+                tl.set(lineTexts, { opacity: 1 });
+
+
+                tl.to(lineBoxes, { scaleX: 0, transformOrigin: 'right center', duration: dur, stagger: dur, ease: 'power2.inOut' });
+            }
+
+            document.querySelectorAll('.text-block p').forEach(text => textAnimate(text));
+
+        })
+
+
+
+    </script>
+
+</body>
+
+</html>
