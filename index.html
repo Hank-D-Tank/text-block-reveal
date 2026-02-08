@@ -48,6 +48,7 @@
         font-weight: 400;
         line-height: 1.6;
         color: #3a3a3a;
+        opacity: 0;
     }
 
     /* ─── CONTAINER (IMAGE + TEXT) ──────────────── */
@@ -140,7 +141,7 @@
 
     <script>
 
-        window.addEventListener("load", () => {
+        window.addEventListener("DOMContentLoaded", () => {
 
             const lenis = new Lenis();
             lenis.on('scroll', ScrollTrigger.update);
@@ -165,6 +166,7 @@
                     line.appendChild(lineText);
                     line.appendChild(lineBox);
 
+                    gsap.set(text, {opacity: 1});
                     gsap.set(lineText, { opacity: 0 });
                     gsap.set(lineBox, { scaleX: 0, transformOrigin: 'left center', backgroundColor: color });
 
